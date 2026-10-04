@@ -30,7 +30,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define UART1_TX_MESSAGE "USART1 DMA 1M\r\n"
+#define UART1_TX_MESSAGE "USART1 DMA 921600\r\n"
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -104,9 +104,18 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		HAL_GPIO_TogglePin(GPIOC,GPIO_PIN_13);
-		HAL_Delay(500);
-	
+    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
+    if (uart1_tx_busy == 0U)
+    {
+      uart1_tx_busy = 1U;
+      if (HAL_UART_Transmit_DMA(&huart1, (uint8_t *)uart1_tx_message,
+                                sizeof(uart1_tx_message) - 1U) != HAL_OK)
+      {
+        uart1_tx_busy = 0U;
+        Error_Handler();
+      }
+    }
+    HAL_Delay(500);
   }
   /* USER CODE END 3 */
 }
@@ -151,6 +160,21 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+static void MX_USART1_UART_Init(void)
+{
+  huart1.Instance = USART1;
+  huart1.Init.BaudRate = 921600U;
+  huart1.Init.WordLength = UART_WORDLENGTH_8B;
+  huart1.Init.StopBits = UART_STOPBITS_1;
+  huart1.Init.Parity = UART_PARITY_NONE;
+  huart1.Init.Mode = UART_MODE_TX_RX;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
 
 /* USER CODE END 4 */
 
