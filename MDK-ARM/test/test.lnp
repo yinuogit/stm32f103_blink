@@ -11,6 +11,7 @@
 "test\stm32f1xx_hal_gpio.o"
 "test\stm32f1xx_hal_dma.o"
 "test\stm32f1xx_hal_uart.o"
+"test\stm32f1xx_hal_can.o"
 "test\stm32f1xx_hal_cortex.o"
 "test\stm32f1xx_hal_pwr.o"
 "test\stm32f1xx_hal_flash.o"

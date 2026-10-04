@@ -1,0 +1,34 @@
+CAN loopback self-test acceptance record
+========================================
+Date     : 2026-10-05
+Board    : STM32F103C8T6 (custom board)
+Firmware : test.axf built with Keil AC5, 0 Error / 0 Warning
+UART     : USART1 PA9, 921600 8N1, TX via DMA1 Channel4 (busy-flag + TxCpltCallback)
+CAN      : CAN1 1 Mbps (Prescaler=4, 1+6+2 tq @ APB1 36MHz), LOOPBACK mode,
+           accept-all filter (Bank0, 32-bit mask, mask=0) on RX FIFO0,
+           RX0 pending interrupt -> HAL_CAN_RxFifo0MsgPendingCallback
+Evidence : raw capture from COM8 (CH340 USB-TTL on PA9), 921600 baud, 6 s window
+
+Interpretation:
+- TX count increments once per 500 ms loop tick.
+- RX count is exactly one behind TX (the frame sent this tick is received within
+  the same tick; the printed RX block is the previous frame).
+- Received payload bytes [0..1] carry a big-endian frame counter: RX #31 carries
+  0x001F=31, RX #43 carries 0x002B=43 -> every frame's payload matches its RX
+  sequence number, proving the full chain: AddTxMessage -> bxCAN loopback ->
+  accept-all filter -> FIFO0 interrupt -> GetRxMessage.
+
+--- captured lines ---
+CAN TX #32 RX #31 d=[00 1F AA 55 11 22 33 44]
+CAN TX #33 RX #32 d=[00 20 AA 55 11 22 33 44]
+CAN TX #34 RX #33 d=[00 21 AA 55 11 22 33 44]
+CAN TX #35 RX #34 d=[00 22 AA 55 11 22 33 44]
+CAN TX #36 RX #35 d=[00 23 AA 55 11 22 33 44]
+CAN TX #37 RX #36 d=[00 24 AA 55 11 22 33 44]
+CAN TX #38 RX #37 d=[00 25 AA 55 11 22 33 44]
+CAN TX #39 RX #38 d=[00 26 AA 55 11 22 33 44]
+CAN TX #40 RX #39 d=[00 27 AA 55 11 22 33 44]
+CAN TX #41 RX #40 d=[00 28 AA 55 11 22 33 44]
+CAN TX #42 RX #41 d=[00 29 AA 55 11 22 33 44]
+CAN TX #43 RX #42 d=[00 2A AA 55 11 22 33 44]
+CAN TX #44 RX #43 d=[00 2B AA 55 11 22 33 44]
