@@ -1,0 +1,33 @@
+FreeRTOS dual-task acceptance record (task 2.2)
+=================================================
+Date     : 2026-10-05
+Board    : STM32F103C8T6 (custom board)
+RTOS     : FreeRTOS 10.3.1 (CubeMX FW_F1 V1.8.7), CMSIS-RTOS V2 wrapper, heap_4 @ 8192 bytes
+Tasks    : CommTask  (osPriorityHigh1,       256 words stack) - CAN TX/RX + UART DMA print, 500 ms
+           LedTask   (osPriorityNormal,     128 words stack) - PC13 toggle, 500 ms
+Build    : Keil AC5, 0 Error / 0 Warning, Code=19588 RO=528 RW=184 ZI=13440
+Note     : HAL timebase stays on SysTick chained with xPortSysTickHandler
+           (CubeMX 6.18 CMSIS-OS2 generated SysTick_Handler), no TIM needed.
+           UART DMA TX wiring + 921600 baud live in usart.c USER CODE sections;
+           CAN accept-all filter + HAL_CAN_Start live in can.c USER CODE sections
+           (CubeMX leaves these to the user).
+
+Evidence : raw capture from COM8 (CH340 USB-TTL on PA9), 921600 baud, 6 s window,
+           firmware running under the FreeRTOS scheduler.
+           RX payload counter (big-endian bytes 0..1) matches RX count on every line,
+           proving CommTask -> CAN1 loopback -> FIFO0 IRQ -> CommTask under RTOS.
+
+--- captured lines ---
+CAN TX #13 RX #12 d=[00 0C AA 55 11 22 33 44]
+CAN TX #14 RX #13 d=[00 0D AA 55 11 22 33 44]
+CAN TX #15 RX #14 d=[00 0E AA 55 11 22 33 44]
+CAN TX #16 RX #15 d=[00 0F AA 55 11 22 33 44]
+CAN TX #17 RX #16 d=[00 10 AA 55 11 22 33 44]
+CAN TX #18 RX #17 d=[00 11 AA 55 11 22 33 44]
+CAN TX #19 RX #18 d=[00 12 AA 55 11 22 33 44]
+CAN TX #20 RX #19 d=[00 13 AA 55 11 22 33 44]
+CAN TX #21 RX #20 d=[00 14 AA 55 11 22 33 44]
+CAN TX #22 RX #21 d=[00 15 AA 55 11 22 33 44]
+CAN TX #23 RX #22 d=[00 16 AA 55 11 22 33 44]
+CAN TX #24 RX #23 d=[00 17 AA 55 11 22 33 44]
+CAN TX #25 RX #24 d=[00 18 AA 55 11 22 33 44]
